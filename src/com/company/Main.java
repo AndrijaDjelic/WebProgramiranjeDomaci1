@@ -1,10 +1,7 @@
 package com.company;
 
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
@@ -43,10 +40,13 @@ public class Main {
         System.out.println("Starting simulation");
 
         boolean flag = false;
-
-
+        ThreadPoolExecutor executor =
+                (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
         while(true){
-            Timer timer = new Timer();
+
+
+
+//            Timer timer = new Timer();
             try {
                 Thread asistentThread = null;
                 if(!studentList.isEmpty()){
@@ -54,7 +54,8 @@ public class Main {
                     if(st!=null){
                         asistentThread = new Thread(st);
 //                        timer.schedule(new TimeOutTask(asistentThread, timer), 5*1000);
-                        asistentThread.start();
+//                        asistentThread.start();
+                         executor.submit(asistentThread);
                     }
                 }
 
@@ -80,10 +81,12 @@ public class Main {
                 }
 
                 if(profesorThread1 !=null){
-                    profesorThread1.start();
+//                    profesorThread1.start();
+                    executor.submit(profesorThread1);
                 }
                 if( profesorThread2 !=null){
-                    profesorThread2.start();
+//                    profesorThread2.start();
+                    executor.submit(profesorThread2);
                 }
 
                 /*while(atomicBoolean.get()){
@@ -95,27 +98,39 @@ public class Main {
                 /**
                  * prekidanje threadova
                  */
-                    if (asistentThread != null && asistentThread.isAlive()) {
+                if (asistentThread != null && asistentThread.isAlive()) {
                         asistentThread.interrupt();
-                    }
-                    if(profesorThread1 !=null && profesorThread1.isAlive()){
+                }
+                if(profesorThread1 !=null && profesorThread1.isAlive()){
                         profesorThread1.interrupt();
-                    }
-                    if(profesorThread2 !=null && profesorThread2.isAlive()){
+                }
+                if(profesorThread2 !=null && profesorThread2.isAlive()){
                         profesorThread2.interrupt();
 
-                    }
+                }
+                if (asistentThread != null) {
+                    asistentThread.join();
+                }
+                if (profesorThread1 != null) {
+                    profesorThread1.join();
+                }
 
+                if (profesorThread2 != null) {
+                    profesorThread2.join();
+                }
 
-
+                /**
+                 * prvo shutdown thread pool
+                 */
                 System.out.println("zavrseni threadovi");
                 if(studentList.isEmpty()){
                     System.out.println("Simulacija zavrsena");
-
+                    executor.shutdownNow();
                     double sum = (double) atomicSum.get();
                     double numberOfNumbers = (double)atomicGradedStudents.get();
                     double prosecnaOcena = sum/numberOfNumbers;
                     System.out.println("Prosecna ocena: " + prosecnaOcena);
+
                     return;
                 }
 

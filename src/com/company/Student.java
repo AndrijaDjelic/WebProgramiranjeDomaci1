@@ -31,9 +31,9 @@ public class Student implements Runnable{
 
     @Override
     public void run() {
-        long threadTime = 0;
+        double threadTime = 0;
         try {
-
+                long startTime = System.currentTimeMillis();
             if(predavac.equals(Predavac.PROFESOR)){
                 System.out.println("Nit broj " + name + " ceka.");
                 cyclicBarrier.await();
@@ -41,7 +41,8 @@ public class Student implements Runnable{
             }
             Thread.sleep((long) (arrival*1000));
 //            System.out.println("Student " + name + " brani odbranu.");
-            threadTime = System.currentTimeMillis()/1000;
+
+            threadTime = (System.currentTimeMillis()-startTime)/1000.0;
             Thread.sleep((long) (ttc*1000));
             Random random = new Random();
             int sugestedGrade = random.nextInt(10);
@@ -53,6 +54,7 @@ public class Student implements Runnable{
 //            System.out.println("Student " + name + " dobija ocenu " + grade);
             System.out.println("Thread: " + name + " Arrival: " + arrival + " Prof: " + predavac + " TTC: " + ttc + " Vreme pocetka odbrane: " + threadTime + " Score: " +grade );
         } catch (InterruptedException | BrokenBarrierException e) {
+            Thread.currentThread().interrupt();
             System.out.println("Prekinut Thread: " + name + " Arrival: " + arrival + " Prof: " + predavac + " TTC: " + ttc + " Vreme pocetka odbrane: " + threadTime + " Score: " +grade );
             Main.atomicSum.getAndAdd(grade);
             Main.atomicGradedStudents.getAndIncrement();
