@@ -40,11 +40,11 @@ public class Main {
         System.out.println("Starting simulation");
 
         boolean flag = false;
-        ThreadPoolExecutor executor =
-                (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
+
         while(true){
 
-
+            ThreadPoolExecutor executor =
+                    (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
 
 //            Timer timer = new Timer();
             try {
@@ -122,10 +122,12 @@ public class Main {
                 /**
                  * prvo shutdown thread pool
                  */
+
+                executor.shutdownNow();
                 System.out.println("zavrseni threadovi");
                 if(studentList.isEmpty()){
                     System.out.println("Simulacija zavrsena");
-                    executor.shutdownNow();
+//                    awaitTerminationAfterShutdown(executor);
                     double sum = (double) atomicSum.get();
                     double numberOfNumbers = (double)atomicGradedStudents.get();
                     double prosecnaOcena = sum/numberOfNumbers;
@@ -139,7 +141,16 @@ public class Main {
             }
 
         }
-
-
+    }
+    public static void awaitTerminationAfterShutdown(ThreadPoolExecutor threadPool) {
+        threadPool.shutdown();
+        try {
+            if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+                threadPool.shutdownNow();
+            }
+        } catch (InterruptedException ex) {
+            threadPool.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }
